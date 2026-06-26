@@ -4,16 +4,22 @@
 	<meta name="google-site-verification" content="btymD0kggIWWZvQMRpFM9p8QUKGVy5u5Y1CywQQAAP0" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Malla Derecho UDP (interactiva)</title>
+    
+    <title>Malla Interactiva Derecho UDP</title>
+    <meta name="description" content="Malla interactiva de Derecho UDP. Visualiza prerrequisitos y progreso.">
+    <meta name="author" content="15-jg">
+
     <style>
         :root {
             --bg-color: #f8f9fa;
             --card-locked: #e9ecef;
             --card-available: #ffffff;
             --card-passed: #d1fae5;
+            --card-partial: #e0f2fe; /* Azul claro para ramos en progreso */
             --border-color: #ced4da;
             --text-color: #343a40;
             --accent-color: #3b82f6;
+            --partial-accent: #0ea5e9;
             --danger-color: #ef4444;
             --warning-color: #f59e0b;
         }
@@ -24,6 +30,9 @@
             color: var(--text-color);
             margin: 0;
             padding: 20px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
 
         /* HEADER & PROGRESS */
@@ -69,6 +78,7 @@
             color: #666;
             display: flex;
             gap: 15px;
+            flex-wrap: wrap;
         }
         .dot { width: 10px; height: 10px; display: inline-block; border-radius: 2px; margin-right: 4px; border: 1px solid #ccc; }
 
@@ -79,7 +89,8 @@
             gap: 8px;
             overflow-x: auto;
             padding-bottom: 40px;
-            min-width: 1400px; /* Asegura scroll horizontal en pantallas chicas */
+            min-width: 1400px; 
+            flex: 1; 
         }
 
         .semester-col {
@@ -104,7 +115,7 @@
             border-radius: 5px;
             padding: 6px;
             font-size: 0.7rem;
-            height: 90px; /* Altura fija para alineación */
+            height: 90px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -113,6 +124,7 @@
             background-color: var(--card-locked);
             color: #6c757d;
             box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            user-select: none;
         }
 
         .card:hover { transform: translateY(-2px); z-index: 10; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
@@ -121,7 +133,6 @@
         .card-name { font-weight: 700; line-height: 1.2; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
         .card-credits { font-size: 0.65rem; text-align: right; margin-top: auto; font-weight: bold; }
         
-        /* Spacer for empty slots to keep alignment */
         .spacer { height: 90px; border: 1px dashed transparent; }
 
         /* STATES */
@@ -131,6 +142,12 @@
             color: var(--text-color); 
             border-left: 3px solid var(--accent-color);
             cursor: pointer;
+        }
+        .partial {
+            background-color: var(--card-partial);
+            color: var(--text-color);
+            border-color: #bae6fd;
+            border-left: 3px solid var(--partial-accent);
         }
         .passed { 
             background-color: var(--card-passed); 
@@ -143,8 +160,29 @@
         .highlight-prereq { box-shadow: 0 0 0 2px var(--warning-color); z-index: 5; }
         .highlight-unlock { box-shadow: 0 0 0 2px var(--accent-color); z-index: 5; }
 
-        /* BIG CARDS (Ex: Programa de Integración) */
-        .card-tall { height: 188px; } /* Ocupa 2 espacios + gap */
+        .card-tall { height: 188px; } 
+        .card-xtall { height: 286px; } /* Para ramos de 3 espacios */
+
+        /* FOOTER */
+        .footer {
+            margin-top: 40px;
+            padding: 20px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #666;
+            border-top: 1px solid #ddd;
+            background-color: #f1f3f5;
+        }
+        
+        .footer a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
+        }
         
     </style>
 </head>
@@ -165,39 +203,37 @@
     </div>
     <div class="legend">
         <div><span class="dot" style="background:#fff; border-left:3px solid blue;"></span>Disponible</div>
+        <div><span class="dot" style="background:#e0f2fe; border-left:3px solid #0ea5e9;"></span>En Progreso</div>
         <div><span class="dot" style="background:#d1fae5; border-left:3px solid green;"></span>Aprobado</div>
         <div><span class="dot" style="background:#e9ecef;"></span>Bloqueado</div>
-        <div><span class="dot" style="border-color: orange;"></span>Prerrequisito</div>
-        <div><span class="dot" style="border-color: blue;"></span>Desbloquea</div>
     </div>
 </div>
 
 <div class="malla-container" id="grid">
     </div>
 
+<footer class="footer">
+    <p>Malla Interactiva Derecho UDP 6.0 | Desarrollado por <strong>15-jg</strong></p>
+    <p>Herramienta de uso estudiantil no oficial. <a href="https://github.com/15-jg/Malla-Derecho-6.0" target="_blank">Ver código fuente en GitHub</a></p>
+</footer>
+
 <script>
-    // ==========================================
-    // DATA COMPLETA (CORREGIDA)
-    // ==========================================
-    
+    // DATA COMPLETA CORREGIDA (CFG e Inglés desplazados)
     const subjects = [
-        // SEMESTRE I
+        // SEMESTRE I (Sin CFG ni Inglés)
         { id: "DER06111", row: 1, sem: 1, name: "Fundamentos Histórico-Sociales", credits: 5, prereqs: [] },
         { id: "DER06112", row: 2, sem: 1, name: "Instituciones Políticas y DDHH", credits: 5, prereqs: [] },
         { id: "DER06113", row: 3, sem: 1, name: "Taller de Razonamiento Jurídico", credits: 10, prereqs: [] },
         { id: "DER06114", row: 4, sem: 1, name: "Taller de Investigación y Esc. Legal", credits: 5, prereqs: [] },
         { id: "DER06115", row: 5, sem: 1, name: "Comunicación Oral", credits: 3, prereqs: [] },
 
-
-        // SEMESTRE II
+        // SEMESTRE II (Comienzan CFG 1 e Inglés I)
         { id: "DER06121", row: 1, sem: 2, name: "Persona y Acto Jurídico", credits: 5, prereqs: ["DER06111"] },
         { id: "DER06122", row: 2, sem: 2, name: "Derecho Constitucional Orgánico", credits: 5, prereqs: ["DER06112"] },
         { id: "DER06123", row: 3, sem: 2, name: "Introducción al Derecho I", credits: 5, prereqs: ["DER06113"] },
         { id: "DER06124", row: 4, sem: 2, name: "Bases Generales del D° Procesal", credits: 5, prereqs: ["DER06113"] },
         { id: "CFG1_6",   row: 6, sem: 2, name: "Curso Formación General", credits: 5, prereqs: [] },
         { id: "CIG1012",  row: 7, sem: 2, name: "Inglés General I", credits: 5, prereqs: [] },
-
-
 
         // SEMESTRE III
         { id: "DER06211", row: 1, sem: 3, name: "Derechos Reales y D° Inmobiliario", credits: 5, prereqs: ["DER06121"] },
@@ -207,7 +243,6 @@
         { id: "CFG2_6",   row: 6, sem: 3, name: "Curso Formación General", credits: 5, prereqs: [] },
         { id: "CIG1013",  row: 7, sem: 3, name: "Inglés General II", credits: 5, prereqs: ["CIG1012"] },
 
-
         // SEMESTRE IV
         { id: "DER06221", row: 1, sem: 4, name: "Derecho de las Obligaciones", credits: 5, prereqs: ["DER06211"] },
         { id: "DER06222", row: 3, sem: 4, name: "Derecho Penal Parte General I", credits: 5, prereqs: ["DER06123"] },
@@ -215,7 +250,6 @@
         { id: "DER06224", row: 5, sem: 4, name: "Derecho Regulatorio", credits: 5, prereqs: ["DER06214"] },
         { id: "CFG3_6",   row: 6, sem: 4, name: "Curso Formación General", credits: 5, prereqs: [] },
         { id: "CIG1014",  row: 7, sem: 4, name: "Inglés General III", credits: 5, prereqs: ["CIG1013"] },
-
         
         // SEMESTRE V
         { id: "DER06311", row: 1, sem: 5, name: "Derecho de Daños", credits: 5, prereqs: ["DER06221"] },
@@ -224,38 +258,37 @@
         { id: "DER06314", row: 4, sem: 5, name: "Procedimientos Judiciales", credits: 5, prereqs: ["DER06223"] },
         { id: "DER06315", row: 5, sem: 5, name: "Derecho Comercial", credits: 5, prereqs: ["DER06224"] },
         { id: "CFG4_6",   row: 6, sem: 5, name: "Curso Formación General", credits: 5, prereqs: [] },
-        
+
 
         // SEMESTRE VI
         { id: "DER06321", row: 1, sem: 6, name: "Contratos", credits: 7, prereqs: ["DER06114", "DER06311"] },
         { id: "DER06322", row: 2, sem: 6, name: "Derecho Administrativo", credits: 5, prereqs: ["DER06223", "DER06224"] },
         { id: "DER06323", row: 3, sem: 6, name: "Derecho Penal Parte Especial", credits: 5, prereqs: ["DER06313"] },
         { id: "DER06324", row: 5, sem: 6, name: "Derecho Societario", credits: 5, prereqs: ["DER06315"] },
-	{ id: "CFG5_6",   row: 6, sem: 6, name: "Curso Formación General", credits: 5, prereqs: [] },
+        { id: "CFG5_6",   row: 6, sem: 6, name: "Curso Formación General", credits: 5, prereqs: [] },
         { id: "CFG6_6",   row: 7, sem: 6, name: "Curso Formación General", credits: 5, prereqs: [] },
-       
 
         // SEMESTRE VII
         { id: "DER06411", row: 1, sem: 7, name: "Derecho de Familia y Sucesorio", credits: 5, prereqs: ["DER06321"] },
         { id: "DER06412", row: 2, sem: 7, name: "Derecho y Medio Ambiente", credits: 5, prereqs: ["DER06322"] },
         { id: "DER06413", row: 3, sem: 7, name: "Proceso Penal", credits: 5, prereqs: ["DER06323"] },
-	{ id: "DER06414", row: 4, sem: 7, name: "Taller de Negociación en Procesos Colab.", credits: 5, prereqs: ["DER06314"] },
+        { id: "DER06414", row: 4, sem: 7, name: "Taller de Negociación en Procesos Colab.", credits: 5, prereqs: ["DER06314"] },
         { id: "DER06415", row: 5, sem: 7, name: "Derecho Tributario", credits: 5, prereqs: ["DER06224"] },
-	{ id: "DER06416", row: 6, sem: 7, name: "Derecho del Trabajo", credits: 5, prereqs: ["DER06214", "DER06223"] },
+        { id: "DER06416", row: 6, sem: 7, name: "Derecho del Trabajo", credits: 5, prereqs: ["DER06214", "DER06223"] },
         
         // SEMESTRE VIII
-        { id: "DER06C_F1", row: 1, sem: 8, name: "Clínicas Jurídicas (o Pasantía)", credits: 12, height: 2, prereqs: ["DER06411", "DER06412", "DER06413", "DER06414", "DER06324", "CFG6_6"] }, 
-        { id: "DER06OP1", row: 3, sem: 8, name: "Curso Optativo I", credits: 5, prereqs: ["DER06321", "DER06322", "DER06323", "DER06324"] },
-        { id: "DER06OP2", row: 4, sem: 8, name: "Curso Optativo II", credits: 5, prereqs: ["DER06321", "DER06322", "DER06323", "DER06324"] },
-        { id: "DER06OP3", row: 5, sem: 8, name: "Curso Optativo III", credits: 5, prereqs: ["DER06321", "DER06322", "DER06323", "DER06324"] },
+        { id: "DER06C_F1", row: 1, sem: 8, name: "Clínicas Jurídicas", credits: 12, height: 2, prereqs: ["DER06411", "DER06412", "DER06413", "DER06414", "DER06324", "CFG6_6"] }, 
         
-        // SEMESTRE IX
-        { id: "DER06C_F2", row: 1, sem: 9, name: "Clínicas Jurídicas II (o Pasantía)", credits: 12, height: 2, prereqs: ["DER06411", "DER06412", "DER06413", "DER06414", "DER06324", "CFG6_6"] },
-        { id: "DER06511", row: 3, sem: 9, name: "Filosofía del Derecho", credits: 5, prereqs: ["DER06213"] },
-        { id: "DER06OP4", row: 4, sem: 9, name: "Curso Optativo IV", credits: 5, prereqs: ["DER06321", "DER06322", "DER06323", "DER06324"] },
-        { id: "DER06512", row: 5, sem: 9, name: "Tecnología e Inteligencia Artificial", credits: 5, prereqs: ["DER06C_F1"] },
-	{ id: "DER06OP5", row: 6, sem: 9, name: "Curso Optativo V", credits: 5, prereqs: ["DER06321", "DER06322", "DER06323", "DER06324"] },
+        // OPTATIVOS AGRUPADOS (I, II y III) - Avanza de 1 en 1
+        { id: "DER06OP_1_3", row: 3, sem: 8, name: "Cursos Optativos", credits: 15, height: 3, isAccumulative: true, step: 1, prereqs: ["DER06321", "DER06322", "DER06323", "DER06324"] },
 
+        // SEMESTRE IX
+        { id: "DER06C_F2", row: 1, sem: 9, name: "Clínicas Jurídicas II o Pasantía", credits: 12, height: 2, prereqs: ["DER06411", "DER06412", "DER06413", "DER06414", "DER06324", "CFG6_6"] },
+        { id: "DER06511", row: 3, sem: 9, name: "Filosofía del Derecho", credits: 5, prereqs: ["DER06213"] },
+        { id: "DER06512", row: 4, sem: 9, name: "Tecnología e Inteligencia Artificial", credits: 5, prereqs: ["DER06C_F1"] },
+        
+        // OPTATIVOS AGRUPADOS (IV y V) - Avanza de 1 en 1
+        { id: "DER06OP_4_5", row: 5, sem: 9, name: "Cursos Optativos", credits: 10, height: 2, isAccumulative: true, step: 1, prereqs: ["DER06321", "DER06322", "DER06323", "DER06324"] },
 
         // SEMESTRE X
         { id: "DER06521", row: 1, sem: 10, name: "Programa de Integración y Prep. de Licenciatura", credits: 23, height: 3, prereqs: ["DER06415", "DER06416", "DER06511", "DER06512"] },
@@ -263,15 +296,15 @@
         { id: "DER06523", row: 5, sem: 10, name: "Taller de Inserción y Emprendimiento", credits: 3, prereqs: ["DER06C_F2"] },
     ];
 
-    // ==========================================
-    // LÓGICA
-    // ==========================================
-    
     let passed = new Set();
-    
-    // Cargar estado guardado
+    let partialCredits = {}; 
+
+    // Cargar estado
     if(localStorage.getItem('malla_progress')) {
         passed = new Set(JSON.parse(localStorage.getItem('malla_progress')));
+    }
+    if(localStorage.getItem('malla_partial')) {
+        partialCredits = JSON.parse(localStorage.getItem('malla_partial'));
     }
 
     function init() {
@@ -295,13 +328,13 @@
                 if (sub) {
                     const card = createCard(sub);
                     col.appendChild(card);
-                    
                     if (sub.height && sub.height > 1) {
                         r += (sub.height - 1); 
-                        card.classList.add('card-tall');
+                        if(sub.height === 3) card.classList.add('card-xtall');
+                        else card.classList.add('card-tall');
+                        
                         if (sub.credits >= 20) card.style.height = '290px'; 
                     }
-
                 } else {
                     const spacer = document.createElement('div');
                     spacer.className = 'spacer';
@@ -317,12 +350,16 @@
         const el = document.createElement('div');
         el.className = 'card locked';
         el.id = sub.id;
+        
+        // Renderizado especial si es un ramo acumulativo
+        const credText = sub.isAccumulative ? `0/${sub.credits} crd` : `${sub.credits} crd`;
+        
         el.innerHTML = `
             <div class="card-code">${sub.id}</div>
             <div class="card-name">${sub.name}</div>
-            <div class="card-credits">${sub.credits} crd</div>
+            <div class="card-credits" id="cred-${sub.id}">${credText}</div>
         `;
-
+        
         el.onclick = () => toggleSubject(sub.id);
         
         el.onmouseenter = () => {
@@ -337,27 +374,48 @@
                 }
             });
         };
-
         el.onmouseleave = () => {
             document.querySelectorAll('.highlight-prereq, .highlight-unlock').forEach(e => {
                 e.classList.remove('highlight-prereq', 'highlight-unlock');
             });
         };
-
         return el;
     }
 
     function toggleSubject(id) {
         const el = document.getElementById(id);
-        if(el.classList.contains('locked') && !passed.has(id)) return;
+        const sub = subjects.find(s => s.id === id);
+        
+        if(el.classList.contains('locked') && !passed.has(id) && !partialCredits[id]) return;
 
+        // LÓGICA PARA RAMOS ACUMULATIVOS
+        if (sub.isAccumulative) {
+            let current = partialCredits[id] || 0;
+            current += sub.step; 
+            
+            if (current > sub.credits) {
+                current = 0;
+                passed.delete(id);
+                removeFuture(id);
+            } else if (current === sub.credits) {
+                passed.add(id);
+            } else {
+                passed.delete(id);
+                removeFuture(id);
+            }
+            
+            partialCredits[id] = current;
+            saveAndRender();
+            return;
+        }
+
+        // LÓGICA NORMAL
         if (passed.has(id)) {
             passed.delete(id);
             removeFuture(id);
         } else {
             passed.add(id);
         }
-        
         saveAndRender();
     }
 
@@ -373,57 +431,72 @@
     function updateState() {
         let totalCredits = 0;
         let earnedCredits = 0;
-
+        
         subjects.forEach(sub => {
             totalCredits += sub.credits;
             const el = document.getElementById(sub.id);
+            const credEl = document.getElementById(`cred-${sub.id}`);
             const canTake = sub.prereqs.every(p => passed.has(p));
+            
+            el.classList.remove('locked', 'available', 'passed', 'partial');
+            
+            // ESTADO PARA ACUMULATIVOS
+            if (sub.isAccumulative) {
+                let current = partialCredits[sub.id] || 0;
+                credEl.innerText = `${current}/${sub.credits} crd`;
+                earnedCredits += current;
 
-            el.classList.remove('locked', 'available', 'passed');
-
-            if (passed.has(sub.id)) {
-                el.classList.add('passed');
-                earnedCredits += sub.credits;
-            } else if (canTake) {
-                el.classList.add('available');
-            } else {
-                el.classList.add('locked');
+                if (current === sub.credits) {
+                    el.classList.add('passed');
+                } else if (canTake) {
+                    el.classList.add('available');
+                    if (current > 0) el.classList.add('partial'); 
+                } else {
+                    el.classList.add('locked');
+                }
+            } 
+            // ESTADO NORMAL
+            else {
+                if (passed.has(sub.id)) {
+                    el.classList.add('passed');
+                    earnedCredits += sub.credits;
+                } else if (canTake) {
+                    el.classList.add('available');
+                } else {
+                    el.classList.add('locked');
+                }
             }
         });
-
+        
         const percent = Math.round((earnedCredits / totalCredits) * 100);
         document.getElementById('txt-credits').innerText = `Créditos: ${earnedCredits} / ${totalCredits}`;
         document.getElementById('txt-percent').innerText = `${percent}%`;
         document.getElementById('bar-fill').style.width = `${percent}%`;
-
+        
         localStorage.setItem('malla_progress', JSON.stringify([...passed]));
+        localStorage.setItem('malla_partial', JSON.stringify(partialCredits));
     }
 
-    function saveAndRender() {
-        updateState();
+    function saveAndRender() { updateState(); }
+    
+    function resetMalla() { 
+        if(confirm("¿Borrar todo el progreso?")) { 
+            passed.clear(); 
+            partialCredits = {}; 
+            saveAndRender(); 
+        } 
     }
-
-    function resetMalla() {
-        if(confirm("¿Borrar todo el progreso?")) {
-            passed.clear();
-            saveAndRender();
-        }
-    }
-
+    
     function romanize(num) {
         const lookup = {X:10, IX:9, V:5, IV:4, I:1};
         let roman = '', i;
         for ( i in lookup ) {
-            while ( num >= lookup[i] ) {
-                roman += i;
-                num -= lookup[i];
-            }
+            while ( num >= lookup[i] ) { roman += i; num -= lookup[i]; }
         }
         return roman;
     }
-
+    
     init();
-
 </script>
 </body>
 </html>
